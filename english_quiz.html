@@ -441,7 +441,7 @@ function prefetchRound(words){
   });
 }
 async function speak(eng,heb,onDone){
-  if(gMuted){setTimeout(()=>{if(onDone)onDone();},1000);return;}
+  if(gMuted){setTimeout(()=>{if(onDone)onDone();},2400);return;}
   const a1=ttsCache["en:"+eng];
   const a2=ttsCache["iw:"+heb];
   if(!a1||!a2||a1.readyState<2||a2.readyState<2){speakFallback(eng,heb,onDone);return;}
