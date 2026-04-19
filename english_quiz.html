@@ -126,6 +126,14 @@ body{
   font-family:inherit;transition:all .13s;padding:0;
 }
 .g-exit:active{transform:scale(.93);background:var(--s3);}
+.g-mute{
+  background:var(--s2);border:1px solid var(--br);color:var(--txt2);
+  font-size:16px;font-weight:600;cursor:pointer;width:34px;height:34px;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:inherit;transition:all .13s;padding:0;
+}
+.g-mute:active{transform:scale(.93);background:var(--s3);}
+.g-mute.muted{color:var(--red);}
 .g-hdr{display:flex;justify-content:space-between;align-items:center;padding:16px 0 8px;width:100%;gap:8px;}
 .g-rd{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;}
 .g-sc{
@@ -325,6 +333,7 @@ body{
     <button class="g-exit" onclick="exitGame()">✕</button>
     <span class="g-rd" id="gRd"></span>
     <span class="g-st" id="gSt"></span>
+    <button class="g-mute" id="muteBtn" onclick="toggleMute()">🔊</button>
     <span class="g-sc" id="gSc"><span class="icon">✓</span> 0</span>
   </div>
   <div class="gp"><div class="gpf" id="gPf" style="width:0%"></div></div>
@@ -432,6 +441,7 @@ function prefetchRound(words){
   });
 }
 async function speak(eng,heb,onDone){
+  if(gMuted){if(onDone)onDone();return;}
   const a1=ttsCache["en:"+eng];
   const a2=ttsCache["iw:"+heb];
   if(!a1||!a2||a1.readyState<2||a2.readyState<2){speakFallback(eng,heb,onDone);return;}
@@ -476,7 +486,7 @@ if(window.speechSynthesis){
   findHebFemale();
 }
 function speakFallback(eng,heb,onDone){
-  if(!window.speechSynthesis){if(onDone)onDone();return;}
+  if(gMuted||!window.speechSynthesis){if(onDone)onDone();return;}
   window.speechSynthesis.cancel();
   const u1=new SpeechSynthesisUtterance(eng);
   u1.lang="en-US";u1.rate=0.9;
@@ -516,7 +526,7 @@ function showHome(){
   document.getElementById("hPl").textContent=kn>0?"אתה יודע "+pct+"% מהמילים":"עדיין לא התחלת";
   showPage("pgHome");
 }
-let gW=[],gI=0,gOk=0,gSt=0,gMx=0,gAnswered=false;
+let gW=[],gI=0,gOk=0,gSt=0,gMx=0,gAnswered=false,gMuted=false;
 function shuf(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 function startGame(){
   try{gAC().resume();}catch(e){}
@@ -617,6 +627,12 @@ function handleAns(btn,chosen,corr,word){
 function exitGame(){
   window.speechSynthesis&&window.speechSynthesis.cancel();
   showHome();
+}
+function toggleMute(){
+  gMuted=!gMuted;
+  const btn=document.getElementById("muteBtn");
+  btn.textContent=gMuted?"🔇":"🔊";
+  btn.classList.toggle("muted");
 }
 function showSummary(){
   const wrong=gW.length-gOk;
